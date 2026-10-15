@@ -189,9 +189,8 @@
           "filters": {
             "all": "Todos",
             "criden": "De Criden",
-            "bots": "Bots",
-            "systems": "Sistemas y web",
-            "ideas": "En definición"
+            "independent": "Trabajos de {name}",
+            "bots": "Bots"
           },
           "filterLabel": "Filtrar proyectos",
           "kinds": {
@@ -206,7 +205,12 @@
           "summary": "{n} proyectos",
           "viewSite": "Ver sitio",
           "viewCode": "Código",
-          "empty": "No hay proyectos en esta categoría."
+          "empty": "No hay proyectos en esta categoría.",
+          "groups": {
+            "criden": "Proyectos de Criden",
+            "independent": "Trabajos de {name}",
+            "independentNote": "Proyectos que {name} desarrolló por su cuenta, antes y fuera de Criden."
+          }
         },
         "process": {
           "label": "Cómo trabajamos"
@@ -403,9 +407,8 @@
           "filters": {
             "all": "All",
             "criden": "By Criden",
-            "bots": "Bots",
-            "systems": "Systems and web",
-            "ideas": "In definition"
+            "independent": "{name}’s work",
+            "bots": "Bots"
           },
           "filterLabel": "Filter projects",
           "kinds": {
@@ -420,7 +423,12 @@
           "summary": "{n} projects",
           "viewSite": "View site",
           "viewCode": "Code",
-          "empty": "There are no projects in this category."
+          "empty": "There are no projects in this category.",
+          "groups": {
+            "criden": "Criden projects",
+            "independent": "{name}’s work",
+            "independentNote": "Projects {name} built independently, before and outside Criden."
+          }
         },
         "process": {
           "label": "How we work"

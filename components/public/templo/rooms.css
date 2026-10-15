@@ -335,3 +335,29 @@
 .tp-trail .tr-room-content .pr-featured .project-art .win-top span {
   color: #1f3a5f;
 }
+
+/* Encabezado de grupo: separa los proyectos de Criden de los trabajos individuales */
+.tp-trail .tr-room-content .pr-group {
+  grid-column: 1 / -1;
+  margin-top: 6px;
+}
+.tp-trail .tr-room-content .pr-group h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgb(239 191 112 / 0.45);
+  color: #ffd17a;
+  font: 800 13px/1.2 var(--sans);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.tp-trail .tr-room-content .pr-group p {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #cfc8d6;
+}
+.tp-trail .tr-room-content .pr-group--indep {
+  margin-top: 18px;
+}

@@ -24,6 +24,7 @@ import {
   Sparkles,
   Target,
   Trophy,
+  User,
   type LucideIcon,
 } from "lucide-react";
 import { ProjectVisual } from "@/components/public";
@@ -56,19 +57,21 @@ function techIcon(name: string): LucideIcon {
 const FILTER_ICON: Record<string, LucideIcon> = {
   all: LayoutGrid,
   criden: Sparkles,
+  independent: User,
   bots: Bot,
-  systems: Layers,
-  ideas: Lightbulb,
 };
-type Filter = "all" | "criden" | "bots" | "systems" | "ideas";
-const FILTERS: Filter[] = ["all", "criden", "bots", "systems", "ideas"];
+type Filter = "all" | "criden" | "independent" | "bots";
+const FILTERS: Filter[] = ["all", "criden", "independent", "bots"];
+
+// Los proyectos de Criden y los trabajos individuales de un miembro (type "independiente") se
+// muestran por separado: no todo lo que hay en la galería lo hizo Criden como equipo.
+const isCriden = (p: Project) => p.type === "criden";
 
 function inFilter(p: Project, f: Filter) {
   if (f === "all") return true;
-  if (f === "criden") return p.type === "criden" && !p.idea;
-  if (f === "bots") return p.kind === "bot";
-  if (f === "ideas") return Boolean(p.idea);
-  return !p.idea && p.kind !== "bot";
+  if (f === "criden") return isCriden(p);
+  if (f === "independent") return !isCriden(p);
+  return p.kind === "bot";
 }
 
 function Head({ id, kicker, title, k }: { id: string; kicker: string; title: string; k: string }) {
@@ -109,15 +112,19 @@ export function ProjectsRoom({ data }: { data: TemploData }) {
 
   const all = data.projects;
   const list = all.filter((p) => inFilter(p, filter));
-  // El proyecto destacado (el primero de Criden terminado) va grande en "Todos" y "De Criden".
-  const featured =
-    filter === "all" || filter === "criden"
-      ? list.find((p) => p.type === "criden" && !p.idea)
-      : undefined;
-  // Lo terminado primero; las ideas en definición al final.
-  const rest = list
+
+  // Nombre de quien hizo los trabajos individuales (primer miembro del primer proyecto suyo).
+  const firstIndependent = all.find((p) => !isCriden(p));
+  const ownerName = data.members.find((m) => m.slug === firstIndependent?.members?.[0])?.name ?? "";
+  const withName = (s: string) => s.replace("{name}", ownerName);
+
+  // Criden: el primer proyecto terminado va destacado; las ideas en definición, al final.
+  const criden = list.filter(isCriden);
+  const featured = criden.find((p) => !p.idea);
+  const cridenRest = criden
     .filter((p) => p !== featured)
     .sort((a, b) => Number(Boolean(a.idea)) - Number(Boolean(b.idea)));
+  const independent = list.filter((p) => !isCriden(p));
 
   const summary = (p: Project) => p[lang].summary || p.es.summary;
   const links = (p: Project) => (
@@ -136,6 +143,30 @@ export function ProjectsRoom({ data }: { data: TemploData }) {
     </div>
   );
 
+  let step = 0;
+  const card = (p: Project) => {
+    const Icon = KIND_ICON[p.kind] ?? Globe;
+    return (
+      <article
+        className="pr-card"
+        key={p.slug}
+        style={{ "--pc": p.accent || "#2f5d8a", "--i": ++step } as React.CSSProperties}
+      >
+        <div className="pr-top">
+          <span className="pr-ico">
+            <Icon size={22} aria-hidden="true" />
+          </span>
+          <span className="pr-kind">{rooms.kinds[p.kind as keyof typeof rooms.kinds]}</span>
+          {p.idea && <span className="pr-soon">{t.ideaStatus}</span>}
+        </div>
+        <h3>{p.name}</h3>
+        <p>{summary(p)}</p>
+        <Tech list={[...p.technologies, ...p.tags]} />
+        {!p.idea && links(p)}
+      </article>
+    );
+  };
+
   return (
     <>
       <Head id="proyectos" kicker={t.projectsLabel} title={t.projectsTitle} k="巻" />
@@ -152,7 +183,7 @@ export function ProjectsRoom({ data }: { data: TemploData }) {
               disabled={n === 0}
             >
               <Icon size={15} aria-hidden="true" />
-              {rooms.filters[f]}
+              {withName(rooms.filters[f])}
               <b>{n}</b>
             </button>
           );
@@ -163,6 +194,14 @@ export function ProjectsRoom({ data }: { data: TemploData }) {
       </p>
 
       <div className="pr-grid" key={filter}>
+        {criden.length > 0 && (
+          <div className="pr-group">
+            <h3>
+              <Sparkles size={16} aria-hidden="true" />
+              {rooms.groups.criden}
+            </h3>
+          </div>
+        )}
         {featured && (
           <article
             className="pr-featured"
@@ -186,28 +225,18 @@ export function ProjectsRoom({ data }: { data: TemploData }) {
             </div>
           </article>
         )}
-        {rest.map((p, i) => {
-          const Icon = KIND_ICON[p.kind] ?? Globe;
-          return (
-            <article
-              className="pr-card"
-              key={p.slug}
-              style={{ "--pc": p.accent || "#2f5d8a", "--i": i + 1 } as React.CSSProperties}
-            >
-              <div className="pr-top">
-                <span className="pr-ico">
-                  <Icon size={22} aria-hidden="true" />
-                </span>
-                <span className="pr-kind">{rooms.kinds[p.kind as keyof typeof rooms.kinds]}</span>
-                {p.idea && <span className="pr-soon">{t.ideaStatus}</span>}
-              </div>
-              <h3>{p.name}</h3>
-              <p>{summary(p)}</p>
-              <Tech list={[...p.technologies, ...p.tags]} />
-              {!p.idea && links(p)}
-            </article>
-          );
-        })}
+        {cridenRest.map(card)}
+
+        {independent.length > 0 && (
+          <div className="pr-group pr-group--indep">
+            <h3>
+              <User size={16} aria-hidden="true" />
+              {withName(rooms.groups.independent)}
+            </h3>
+            <p>{withName(rooms.groups.independentNote)}</p>
+          </div>
+        )}
+        {independent.map(card)}
         {list.length === 0 && <p className="pr-empty">{rooms.empty}</p>}
       </div>
 

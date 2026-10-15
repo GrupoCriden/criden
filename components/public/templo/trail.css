@@ -23,9 +23,10 @@
 .tp-trail .tr-hero {
   position: relative;
 }
-/* La capa queda fija sobre las escenas para que las nubes sigan visibles durante el recorrido. */
+/* Las nubes solo viven en la portada (donde se ve el cielo): suben con ella al hacer scroll y no
+   flotan sobre las escenas de las salas. */
 .tp-trail .tr-cloud-layer {
-  position: fixed;
+  position: absolute;
   z-index: 3;
   top: 0;
   right: 0;
