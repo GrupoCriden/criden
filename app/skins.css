@@ -689,3 +689,19 @@ html[data-style="noche"] .xv-band .xv-btn:not(.alt) {
     display: none;
   }
 }
+
+/* Contacto: texto y botones a la izquierda, formulario de cotización a la derecha */
+.xv-contact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 32px;
+  align-items: start;
+}
+.xv-contact .xv-card {
+  background: var(--xv-bg);
+}
+@media (max-width: 900px) {
+  .xv-contact {
+    grid-template-columns: 1fr;
+  }
+}

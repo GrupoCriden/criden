@@ -216,6 +216,39 @@
           "label": "Cómo trabajamos"
         }
       }
+    },
+    "quote": {
+      "title": "Cuéntanos tu proyecto",
+      "intro": "Responde estas preguntas y te escribimos con una propuesta. Sin compromiso.",
+      "name": "Tu nombre",
+      "contact": "Correo o WhatsApp",
+      "contactHint": "Para responderte",
+      "type": "¿Qué necesitas?",
+      "types": [
+        "Página web o plataforma",
+        "Sistema a la medida",
+        "Bot o automatización",
+        "Otra idea"
+      ],
+      "deadline": "¿Para cuándo?",
+      "deadlines": [
+        "Lo antes posible",
+        "En 1 a 3 meses",
+        "Sin apuro"
+      ],
+      "message": "Cuéntanos más",
+      "messagePlaceholder": "Describe lo que quieres lograr o el problema que tienes.",
+      "send": "Enviar mi proyecto",
+      "sending": "Enviando…",
+      "success": "¡Recibido!",
+      "successNote": "Te escribiremos pronto con una propuesta.",
+      "again": "Enviar otro mensaje",
+      "error": "No pudimos enviar el formulario. Inténtalo de nuevo o escríbenos directamente.",
+      "fallback": "El formulario todavía no está disponible. Escríbenos directamente:",
+      "privacy": "Solo usamos estos datos para responderte.",
+      "required": "Obligatorio",
+      "mailLabel": "Correo",
+      "mailSubject": "Nuevo proyecto desde la web de Criden"
     }
   },
   "en": {
@@ -434,6 +467,39 @@
           "label": "How we work"
         }
       }
+    },
+    "quote": {
+      "title": "Tell us about your project",
+      "intro": "Answer a few questions and we will get back to you with a proposal. No strings attached.",
+      "name": "Your name",
+      "contact": "Email or WhatsApp",
+      "contactHint": "So we can reply",
+      "type": "What do you need?",
+      "types": [
+        "Website or platform",
+        "Custom system",
+        "Bot or automation",
+        "Something else"
+      ],
+      "deadline": "When do you need it?",
+      "deadlines": [
+        "As soon as possible",
+        "In 1 to 3 months",
+        "No rush"
+      ],
+      "message": "Tell us more",
+      "messagePlaceholder": "Describe what you want to achieve or the problem you have.",
+      "send": "Send my project",
+      "sending": "Sending…",
+      "success": "Received!",
+      "successNote": "We will write back soon with a proposal.",
+      "again": "Send another message",
+      "error": "We could not send the form. Please try again or contact us directly.",
+      "fallback": "The form is not available yet. Contact us directly:",
+      "privacy": "We only use this information to reply to you.",
+      "required": "Required",
+      "mailLabel": "Email",
+      "mailSubject": "New project from the Criden website"
     }
   },
   "contactInfo": {

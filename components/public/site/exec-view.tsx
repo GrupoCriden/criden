@@ -10,6 +10,7 @@ import {
 } from "@/lib/content";
 import { ProjectVisual } from "@/components/public";
 import { Avatar } from "@/components/public/avatar";
+import { QuoteForm } from "@/components/public/quote-form";
 import { LogoReveal } from "@/components/public/logo-reveal";
 import { StyleButton } from "@/components/public/site/style-provider";
 
@@ -168,14 +169,13 @@ export function ExecView({ lang }: { lang: Lang }) {
             </div>
           </div>
         </section>
-        <section id="contacto" className="xv-sec" style={{ paddingTop: 0 }}>
-          <div className="xv-w">
-            <div className="xv-band">
-              <div>
-                <h2>{t.contactTitle}</h2>
-                <p>{t.contactText}</p>
-              </div>
-              <div>
+        <section id="contacto" className="xv-sec alt">
+          <div className="xv-w xv-contact">
+            <div>
+              <p className="xv-k">{t.contact}</p>
+              <h2>{t.contactTitle}</h2>
+              <p className="xv-lead">{t.contactText}</p>
+              <div className="xv-row">
                 <a className="xv-btn" href={wa} target="_blank" rel="noopener noreferrer">
                   {t.whatsappCta}
                 </a>
@@ -183,6 +183,14 @@ export function ExecView({ lang }: { lang: Lang }) {
                   {contactInfo.email}
                 </a>
               </div>
+            </div>
+            <div className="xv-card">
+              <QuoteForm
+                labels={t.quote}
+                lang={lang}
+                whatsapp={contactInfo.whatsapp}
+                email={contactInfo.email}
+              />
             </div>
           </div>
         </section>

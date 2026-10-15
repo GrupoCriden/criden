@@ -19,7 +19,7 @@ import { StyleButton } from "@/components/public/site/style-provider";
 import { PAINT, keyed } from "./engine";
 import { buildHalls, HALL_IDS } from "./halls";
 import { mountPetals } from "./petals";
-import { AboutRoom, ProjectsRoom } from "./rooms";
+import { AboutRoom, ContactRoom, ProjectsRoom } from "./rooms";
 import { STOP_MEDIA, STOP_MEDIA_MOBILE } from "./trail-scenes";
 import type { HallId, TemploData } from "./types";
 import "./templo.css";
@@ -705,16 +705,20 @@ export default function Trail({ data }: { data: TemploData }) {
             </section>
           )}
           {activeRoom &&
-            (activeRoom.id === "proyectos" || activeRoom.id === "nosotros" ? (
+            (activeRoom.id === "proyectos" ||
+            activeRoom.id === "nosotros" ||
+            activeRoom.id === "contacto" ? (
               <article
                 className="paper tr-room-content"
                 aria-labelledby={`templo-room-heading-${activeRoom.id}`}
               >
-                {/* Salas visuales (rooms.tsx): iconos, galería filtrable y proceso */}
+                {/* Salas visuales (rooms.tsx): galería filtrable, proceso y formulario de contacto */}
                 {activeRoom.id === "proyectos" ? (
                   <ProjectsRoom data={data} />
-                ) : (
+                ) : activeRoom.id === "nosotros" ? (
                   <AboutRoom data={data} />
+                ) : (
+                  <ContactRoom data={data} />
                 )}
               </article>
             ) : (

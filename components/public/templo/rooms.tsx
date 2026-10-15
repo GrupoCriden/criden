@@ -17,6 +17,7 @@ import {
   Layers,
   Lightbulb,
   LayoutGrid,
+  MessageCircle,
   MapPin,
   Palette,
   Rocket,
@@ -28,6 +29,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { ProjectVisual } from "@/components/public";
+import { QuoteForm } from "@/components/public/quote-form";
 import type { TemploData } from "./types";
 
 // Salas con contenido más visual que el pergamino de texto: Proyectos (galería filtrable) y
@@ -290,6 +292,39 @@ export function AboutRoom({ data }: { data: TemploData }) {
       <div className="row">
         <button className="go" data-next="proyectos">
           {t.templo.halls.nosotros.next}
+        </button>
+      </div>
+    </>
+  );
+}
+
+// El Puente: formulario para contarnos el proyecto (llega por correo) y contacto directo.
+export function ContactRoom({ data }: { data: TemploData }) {
+  const { t, lang, contact } = data;
+  return (
+    <>
+      <Head id="contacto" kicker={t.contact} title={t.contactTitle} k="橋" />
+      <p>
+        {t.contactText} {t.templo.bridgeText}
+      </p>
+      <QuoteForm
+        labels={t.quote}
+        lang={lang}
+        whatsapp={contact.whatsapp}
+        email={contact.email}
+        showTitle={false}
+      />
+      <div className="row">
+        <a
+          className="go"
+          href={`https://wa.me/${contact.whatsapp}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <MessageCircle size={18} aria-hidden="true" /> {t.whatsappCta}
+        </a>
+        <button className="go alt" data-next="puerta">
+          {t.templo.halls.contacto.next}
         </button>
       </div>
     </>
