@@ -2,7 +2,18 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { AppWindow, Bot, Code, MessageCircle, Volume2, VolumeX, Wind, X } from "lucide-react";
+import {
+  AppWindow,
+  Bot,
+  ChevronLeft,
+  ChevronRight,
+  Code,
+  MessageCircle,
+  Volume2,
+  VolumeX,
+  Wind,
+  X,
+} from "lucide-react";
 import { LogoReveal } from "@/components/public/logo-reveal";
 import { StyleButton } from "@/components/public/site/style-provider";
 import { PAINT, keyed } from "./engine";
@@ -12,6 +23,7 @@ import { STOP_MEDIA, STOP_MEDIA_MOBILE } from "./trail-scenes";
 import type { HallId, TemploData } from "./types";
 import "./templo.css";
 import "./trail.css";
+import "./trail-nav.css";
 
 // Icono de cada servicio, en el orden de `services` del contenido.
 const SERVICE_ICONS = [AppWindow, Code, Bot];
@@ -91,6 +103,9 @@ export default function Trail({ data }: { data: TemploData }) {
   const media = data.media;
   const halls = useMemo(() => buildHalls(data), [data]);
   const [activeHall, setActiveHall] = useState<HallId | null>(null);
+  // Sala que ocupa la pantalla mientras se recorre (null en la portada); alimenta la barra de salas.
+  const [currentStop, setCurrentStop] = useState<HallId | null>(null);
+  const st = t.templo.stations;
   const activeRoom = activeHall ? halls.find((hall) => hall.id === activeHall) : null;
   const roomDialogRef = useRef<HTMLDialogElement>(null);
   const roomTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -103,6 +118,32 @@ export default function Trail({ data }: { data: TemploData }) {
   const windStart = useRef<number | null>(null);
   const windReset = useRef<number | null>(null);
 
+  // Lleva a cualquier sala: baja hasta ella y, si `open`, muestra su contenido sin pedir otro clic.
+  // Si el cuadro ya está abierto, solo cambia de sala (sin cerrarlo ni volver a tocar botones).
+  const goToHall = (id: HallId, open = true) => {
+    const root = ref.current;
+    const stop = root?.querySelector<HTMLElement>(`#templo-${id}`);
+    if (!root || !stop) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (window.location.hash !== `#${stop.id}`) window.history.pushState(null, "", `#${stop.id}`);
+    stop.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+    const trigger = stop.querySelector<HTMLButtonElement>(".tr-scene-target");
+    if (trigger) roomTriggerRef.current = trigger;
+    if (roomDialogRef.current?.open) {
+      if (id === "nosotros") startHallAmbience();
+      else stopHallAmbience();
+      setActiveHall(id);
+    } else if (open) {
+      window.setTimeout(() => activateHall(id), reduced ? 0 : 650);
+    } else {
+      stop.focus({ preventScroll: true });
+    }
+  };
+  const stepHall = (dir: 1 | -1) => {
+    const from = activeHall ?? currentStop;
+    const i = from ? HALL_IDS.indexOf(from) : dir === 1 ? -1 : HALL_IDS.length;
+    goToHall(HALL_IDS[Math.min(Math.max(i + dir, 0), HALL_IDS.length - 1)], true);
+  };
   const goToGate = (behavior: ScrollBehavior = "smooth") => {
     const gate = ref.current?.querySelector<HTMLElement>("#templo-puerta");
     if (!gate) return;
@@ -111,6 +152,7 @@ export default function Trail({ data }: { data: TemploData }) {
     }
     gate.scrollIntoView({ behavior, block: "start" });
     gate.focus({ preventScroll: true });
+    window.setTimeout(() => activateHall("puerta"), behavior === "auto" ? 0 : 650);
   };
   const startHallAmbience = () => {
     const audio = hallAudioRef.current;
@@ -139,13 +181,16 @@ export default function Trail({ data }: { data: TemploData }) {
     setHallAmbienceVolume(volume);
     if (hallAudioRef.current) hallAudioRef.current.volume = volume;
   };
-  const openHall = (id: HallId, trigger: HTMLButtonElement) => {
-    roomTriggerRef.current = trigger;
+  const activateHall = (id: HallId) => {
     if (id === "nosotros") startHallAmbience();
     else stopHallAmbience();
     const hash = `#templo-${id}`;
     if (window.location.hash !== hash) window.history.pushState(null, "", hash);
     setActiveHall(id);
+  };
+  const openHall = (id: HallId, trigger: HTMLButtonElement) => {
+    roomTriggerRef.current = trigger;
+    activateHall(id);
   };
   const closeHall = () => {
     const dialog = roomDialogRef.current;
@@ -268,25 +313,27 @@ export default function Trail({ data }: { data: TemploData }) {
       );
       const id = button?.dataset.next;
       if (!button || !id || !HALL_IDS.includes(id as (typeof HALL_IDS)[number])) return;
-      const next = root.querySelector<HTMLElement>(`#templo-${id}`);
-      if (!next) return;
-
       event.preventDefault();
-      if (window.location.hash !== `#${next.id}`) {
-        window.history.pushState(null, "", `#${next.id}`);
-      }
-      next.scrollIntoView({ behavior: motion.matches ? "auto" : "smooth", block: "start" });
-      const nextHall = id as HallId;
-      const nextTrigger = next.querySelector<HTMLButtonElement>(".tr-scene-target");
-      if (nextTrigger) roomTriggerRef.current = nextTrigger;
-      if (roomDialogRef.current?.open) {
-        if (nextHall === "nosotros") startHallAmbience();
-        else stopHallAmbience();
-        setActiveHall(nextHall);
-      } else {
-        next.focus({ preventScroll: true });
-      }
+      goToHall(id as HallId, true);
     };
+    // Sala que ocupa la pantalla: la resalta en la barra de salas.
+    const seen = new Map<string, number>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) seen.set(e.target.id, e.intersectionRatio);
+        let best: string | null = null;
+        let bestRatio = 0.35;
+        for (const [id, ratio] of seen) {
+          if (ratio > bestRatio) {
+            best = id;
+            bestRatio = ratio;
+          }
+        }
+        setCurrentStop(best ? (best.replace("templo-", "") as HallId) : null);
+      },
+      { threshold: [0, 0.2, 0.35, 0.5, 0.65, 0.8, 1] },
+    );
+    root.querySelectorAll<HTMLElement>(".tr-stop").forEach((el) => observer.observe(el));
 
     paint();
     window.addEventListener("scroll", queue, { passive: true });
@@ -311,6 +358,7 @@ export default function Trail({ data }: { data: TemploData }) {
       root.removeEventListener("pointerleave", onPointerLeave);
       if (windStart.current !== null) window.clearTimeout(windStart.current);
       if (windReset.current !== null) window.clearTimeout(windReset.current);
+      observer.disconnect();
       removePetals();
     };
   }, []);
@@ -402,7 +450,14 @@ export default function Trail({ data }: { data: TemploData }) {
             })}
           </ul>
           <div className="tr-cta">
-            <a className="tr-btn" href="#templo-puerta">
+            <a
+              className="tr-btn"
+              href="#templo-puerta"
+              onClick={(e) => {
+                e.preventDefault();
+                goToHall("puerta", true);
+              }}
+            >
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M3 5c6 1.6 12 1.6 18 0M5 10h14M7.5 6.2V21M16.5 6.2V21" />
               </svg>
@@ -411,7 +466,14 @@ export default function Trail({ data }: { data: TemploData }) {
                 {hero.exploreNote}
               </span>
             </a>
-            <a className="tr-btn alt" href="#templo-contacto">
+            <a
+              className="tr-btn alt"
+              href="#templo-contacto"
+              onClick={(e) => {
+                e.preventDefault();
+                goToHall("contacto", true);
+              }}
+            >
               <MessageCircle size={26} aria-hidden="true" />
               <span>
                 <b>{hero.contact}</b>
@@ -426,7 +488,7 @@ export default function Trail({ data }: { data: TemploData }) {
         <section
           key={h.id}
           id={`templo-${h.id}`}
-          className="tr-stop"
+          className={"tr-stop" + (currentStop === h.id ? " is-current" : "")}
           aria-labelledby={`templo-stop-${h.id}-title`}
           tabIndex={-1}
         >
@@ -456,13 +518,53 @@ export default function Trail({ data }: { data: TemploData }) {
             />
           </div>
           <h2 className="tr-scene-heading" id={`templo-stop-${h.id}-title`}>
-            <span className="tr-scene-label">
+            <button
+              type="button"
+              className="tr-scene-label"
+              aria-haspopup="dialog"
+              aria-controls="templo-room-dialog"
+              onClick={(event) => {
+                roomTriggerRef.current = event.currentTarget;
+                activateHall(h.id);
+              }}
+            >
               <span aria-hidden="true">{h.k}</span>
               <strong>{h.name}</strong>
-            </span>
+              <em>{st.enter} →</em>
+            </button>
           </h2>
         </section>
       ))}
+
+      <nav className="tr-stations" data-hidden={currentStop === null} aria-label={st.label}>
+        <button
+          type="button"
+          aria-label={st.prev}
+          onClick={() => stepHall(-1)}
+          disabled={currentStop === HALL_IDS[0]}
+        >
+          <ChevronLeft size={18} aria-hidden="true" />
+        </button>
+        {halls.map((h) => (
+          <button
+            key={h.id}
+            type="button"
+            aria-current={currentStop === h.id ? "true" : undefined}
+            onClick={() => goToHall(h.id, true)}
+          >
+            <i aria-hidden="true">{h.k}</i>
+            <span>{h.nav}</span>
+          </button>
+        ))}
+        <button
+          type="button"
+          aria-label={st.next}
+          onClick={() => stepHall(1)}
+          disabled={currentStop === HALL_IDS[HALL_IDS.length - 1]}
+        >
+          <ChevronRight size={18} aria-hidden="true" />
+        </button>
+      </nav>
 
       <dialog
         ref={roomDialogRef}
@@ -473,6 +575,11 @@ export default function Trail({ data }: { data: TemploData }) {
           if (event.target === event.currentTarget) closeHall();
         }}
         onClose={onRoomDialogClose}
+        onKeyDown={(event) => {
+          if (event.target instanceof HTMLInputElement) return;
+          if (event.key === "ArrowRight") stepHall(1);
+          else if (event.key === "ArrowLeft") stepHall(-1);
+        }}
       >
         {activeHall === "nosotros" && (
           <div className="tr-hall-guests" aria-hidden="true">
@@ -518,6 +625,35 @@ export default function Trail({ data }: { data: TemploData }) {
           </div>
         )}
         <div className="tr-room-dialog-inner">
+          <nav className="tr-room-tabs" aria-label={st.rooms}>
+            <button
+              type="button"
+              aria-label={st.prev}
+              onClick={() => stepHall(-1)}
+              disabled={activeHall === HALL_IDS[0]}
+            >
+              <ChevronLeft size={18} aria-hidden="true" />
+            </button>
+            {halls.map((h) => (
+              <button
+                key={h.id}
+                type="button"
+                aria-current={activeHall === h.id ? "true" : undefined}
+                onClick={() => goToHall(h.id, true)}
+              >
+                <i aria-hidden="true">{h.k}</i>
+                <span>{h.nav}</span>
+              </button>
+            ))}
+            <button
+              type="button"
+              aria-label={st.next}
+              onClick={() => stepHall(1)}
+              disabled={activeHall === HALL_IDS[HALL_IDS.length - 1]}
+            >
+              <ChevronRight size={18} aria-hidden="true" />
+            </button>
+          </nav>{" "}
           <button
             type="button"
             className="tr-room-close"

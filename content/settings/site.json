@@ -176,6 +176,13 @@
         "contact": "Cuéntanos tu proyecto",
         "contactNote": "Hablemos sin compromiso",
         "wind": "Soplar viento"
+      },
+      "stations": {
+        "label": "Recorrido por las salas",
+        "prev": "Sala anterior",
+        "next": "Sala siguiente",
+        "enter": "Entrar",
+        "rooms": "Cambiar de sala"
       }
     }
   },
@@ -355,6 +362,13 @@
         "contact": "Tell us about your project",
         "contactNote": "Let’s talk, no strings attached",
         "wind": "Create a gust"
+      },
+      "stations": {
+        "label": "Tour of the halls",
+        "prev": "Previous hall",
+        "next": "Next hall",
+        "enter": "Enter",
+        "rooms": "Switch hall"
       }
     }
   },
