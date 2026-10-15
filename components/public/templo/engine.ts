@@ -21,7 +21,7 @@ function mix(a: string, b: string, t: number) {
     ).join("")
   );
 }
-function keyed(keys: string[], t: number) {
+export function keyed(keys: string[], t: number) {
   const n = keys.length - 1,
     p = Math.min(Math.max(t, 0), 1) * n,
     i = Math.min(Math.floor(p), n - 1);
@@ -30,7 +30,7 @@ function keyed(keys: string[], t: number) {
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 // Colores de cada capa del paisaje a lo largo del día: amanecer, mediodía, tarde, atardecer, noche.
-const PAINT: Record<string, string[]> = {
+export const PAINT: Record<string, string[]> = {
   mFar: ["#a58bc4", "#8fb7e6", "#8f9fd6", "#7a5a98", "#262f6e"],
   mMid: ["#7467ad", "#5f8fc4", "#5a73b0", "#52407e", "#19234f"],
   mNear: ["#3f4f8c", "#2f6aa0", "#35508f", "#352b66", "#111b3f"],
@@ -39,9 +39,9 @@ const PAINT: Record<string, string[]> = {
   water: ["#8fb1dc", "#4aa0d8", "#5b8fd0", "#6a5a9c", "#1c2b5c"],
   bank: ["#14304f", "#17496a", "#143a5c", "#161a3c", "#070d1f"],
 };
-const SKY_A = ["#5b4b94", "#4aa3e8", "#3d7bd6", "#4a3a8a", "#050b1c"];
-const SKY_B = ["#ffd0a0", "#bfe6ff", "#ffe3a8", "#ff8a6a", "#3b3566"];
-const FAR_COL = ["#9d86c2", "#7f9fd8", "#7c88c4", "#5b4580", "#1c2558"];
+export const SKY_A = ["#5b4b94", "#4aa3e8", "#3d7bd6", "#4a3a8a", "#050b1c"];
+export const SKY_B = ["#ffd0a0", "#bfe6ff", "#ffe3a8", "#ff8a6a", "#3b3566"];
+export const FAR_COL = ["#9d86c2", "#7f9fd8", "#7c88c4", "#5b4580", "#1c2558"];
 
 export function mountTemplo(root: HTMLElement, data: TemploData): () => void {
   const q = <T extends Element = HTMLElement>(s: string) => root.querySelector(s) as T;

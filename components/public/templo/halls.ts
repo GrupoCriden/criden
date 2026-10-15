@@ -35,8 +35,8 @@ export function buildHalls(d: TemploData): Hall[] {
   const h = t.templo.halls;
   const items = (list: { title: string; text: string }[]) =>
     list.map((i) => `<div><b>${esc(i.title)}</b>${esc(i.text)}</div>`).join("");
-  const head = (kicker: string, title: string, k: string) =>
-    `<p class="kicker">${esc(kicker)}</p><h2 id="sTitle">${esc(title)}</h2><span class="stamp" aria-hidden="true">${k}</span>`;
+  const head = (id: HallId, kicker: string, title: string, k: string) =>
+    `<p class="kicker">${esc(kicker)}</p><h2 id="templo-room-heading-${id}" tabindex="-1">${esc(title)}</h2><span class="stamp" aria-hidden="true">${k}</span>`;
   // Botón al final de cada pergamino: lleva a la sala siguiente (la última vuelve a la puerta).
   const next = (id: HallId, alt = false) => {
     const target = HALL_IDS[(HALL_IDS.indexOf(id) + 1) % HALL_IDS.length];
@@ -66,23 +66,23 @@ export function buildHalls(d: TemploData): Hall[] {
 
   const html: Record<HallId, string> = {
     puerta:
-      head(t.servicesLabel, t.servicesTitle, GEOM.puerta.k) +
+      head("puerta", t.servicesLabel, t.servicesTitle, GEOM.puerta.k) +
       `<div class="services">${items(t.services)}</div><p style="margin-top:14px">${esc(t.templo.gateText)}</p>` +
       next("puerta"),
     nosotros:
-      head(t.aboutLabel, t.about, GEOM.nosotros.k) +
+      head("nosotros", t.aboutLabel, t.about, GEOM.nosotros.k) +
       `<div class="pillars">${items(t.values)}</div>` +
       next("nosotros"),
     proyectos:
-      head(t.projectsLabel, t.projectsTitle, GEOM.proyectos.k) +
+      head("proyectos", t.projectsLabel, t.projectsTitle, GEOM.proyectos.k) +
       `<div class="scrolls">${projectCards}</div>` +
       next("proyectos"),
     equipo:
-      head(t.teamLabel, t.teamTitle, GEOM.equipo.k) +
+      head("equipo", t.teamLabel, t.teamTitle, GEOM.equipo.k) +
       `<div class="masters">${team}</div>` +
       next("equipo"),
     contacto:
-      head(t.contact, t.contactTitle, GEOM.contacto.k) +
+      head("contacto", t.contact, t.contactTitle, GEOM.contacto.k) +
       `<p>${esc(t.contactText)} ${esc(t.templo.bridgeText)}</p><div class="row"><a class="go" href="https://wa.me/${esc(d.contact.whatsapp)}" target="_blank" rel="noopener noreferrer">${esc(t.whatsappCta)}</a><a class="go alt" href="mailto:${esc(d.contact.email)}">${esc(d.contact.email)}</a></div>` +
       next("contacto", true),
   };

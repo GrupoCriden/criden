@@ -155,6 +155,27 @@
           "nav": "Contacto",
           "next": "Volver a la puerta"
         }
+      },
+      "hero": {
+        "headline": {
+          "pre": "Tus ideas merecen convertirse en ",
+          "mark": "realidad digital",
+          "post": "."
+        },
+        "intro": {
+          "pre": "En Criden diseñamos y construimos páginas web, sistemas a la medida y soluciones digitales que ",
+          "mark": "impulsan tu negocio",
+          "post": "."
+        },
+        "services": [
+          "Modernas, rápidas y escalables",
+          "Adaptados a tus procesos y necesidades",
+          "Ahorra tiempo y enfócate en crecer"
+        ],
+        "exploreNote": "Conoce nuestros servicios",
+        "contact": "Cuéntanos tu proyecto",
+        "contactNote": "Hablemos sin compromiso",
+        "wind": "Soplar viento"
       }
     }
   },
@@ -313,6 +334,27 @@
           "nav": "Contact",
           "next": "Back to the gate"
         }
+      },
+      "hero": {
+        "headline": {
+          "pre": "Your ideas deserve to become a ",
+          "mark": "digital reality",
+          "post": "."
+        },
+        "intro": {
+          "pre": "At Criden we design and build websites, custom systems and digital solutions that ",
+          "mark": "grow your business",
+          "post": "."
+        },
+        "services": [
+          "Modern, fast and scalable",
+          "Fitted to your processes and needs",
+          "Save time and focus on growing"
+        ],
+        "exploreNote": "See our services",
+        "contact": "Tell us about your project",
+        "contactNote": "Let’s talk, no strings attached",
+        "wind": "Create a gust"
       }
     }
   },
@@ -320,5 +362,10 @@
     "whatsapp": "593960664347",
     "email": "dennys14_hq@hotmail.com"
   },
-  "defaultStyle": "templo"
+  "defaultStyle": "templo",
+  "temploMedia": {
+    "wide": "/uploads/templo-background-wide.webp",
+    "tablet": "/uploads/templo-background-tablet.webp",
+    "tall": "/uploads/templo-background-mobile.webp"
+  }
 }

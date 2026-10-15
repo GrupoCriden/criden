@@ -50,5 +50,9 @@ export function avatarMarkup(p: AvatarTraits, clip: string): string {
 let n = 0;
 // SVG completo como texto, para incrustarlo dentro de otra escena (`attrs`: x, y, width, height).
 export function avatarSvg(p: AvatarTraits, attrs: string, label: string): string {
-  return `<svg ${attrs} viewBox="0 0 200 200" role="img" aria-label="${label}">${avatarMarkup(p, "tpav" + n++)}</svg>`;
+  const safeLabel = label.replace(
+    /[&<>"']/g,
+    (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]!,
+  );
+  return `<svg ${attrs} viewBox="0 0 200 200" role="img" aria-label="${safeLabel}">${avatarMarkup(p, "tpav" + n++)}</svg>`;
 }

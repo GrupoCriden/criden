@@ -357,6 +357,9 @@ function hills(id, y0, amp, seed) {
   return '<path id="' + id + '" d="' + d + " L" + (W + FAR) + ' 5200Z" fill="#234"/>';
 }
 
+// Piezas sueltas, para armar otras composiciones (recorrido vertical en trail-scenes.ts).
+export const PIECES = { torii, hall, gallery, tea, bridge, pine, sakura, lantern, plaque, ridge, farPagoda, house };
+
 export function buildMap(d: SceneData): string {
   return (
     '<defs><radialGradient id="lg"><stop offset="0" stop-color="#ffb86b" stop-opacity=".9"/><stop offset="1" stop-color="#ffb86b" stop-opacity="0"/></radialGradient><linearGradient id="mist" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".5"/></linearGradient></defs>' +

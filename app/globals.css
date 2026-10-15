@@ -113,6 +113,138 @@ p {
 .mark span {
   color: var(--primary);
 }
+
+/* Logo (components/public/logo-reveal.tsx). El tamaño de letra es el alto del símbolo.
+   Sin .logo-reveal queda fijo; con ella, el símbolo gira y encaja al cargar la página. */
+.logo {
+  --logo-blue: #1748c7;
+  --logo-navy: #1d2e42;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22em;
+  min-height: 44px;
+  font-size: 38px;
+  line-height: 1;
+}
+.logo-mark {
+  position: relative;
+  flex: none;
+  width: 1.731em;
+  height: 1em;
+  perspective: 6em;
+}
+.logo-turn,
+.logo-piece {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+.logo-mark svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.logo-c,
+.logo-lines {
+  fill: var(--logo-blue);
+}
+.logo-d,
+.logo-bars,
+.logo-word {
+  fill: var(--logo-navy);
+}
+.logo-side {
+  visibility: hidden;
+  filter: brightness(0.7);
+}
+.logo-detail * {
+  transform-box: fill-box;
+}
+.logo-word {
+  flex: none;
+  height: 0.438em;
+  aspect-ratio: 599 / 96;
+}
+
+/* --logo-wait retrasa todo el conjunto (.logo-late: espera a que el telón cubra la pantalla) */
+.logo-late {
+  --logo-wait: 0.55s;
+}
+.logo-reveal .logo-turn {
+  animation: logo-turn 0.8s cubic-bezier(0.45, 0, 0.15, 1) var(--logo-wait, 0s) backwards;
+}
+.logo-reveal .logo-c {
+  animation: logo-join-c 0.8s cubic-bezier(0.45, 0, 0.15, 1) var(--logo-wait, 0s) backwards;
+}
+.logo-reveal .logo-d {
+  animation: logo-join-d 0.8s cubic-bezier(0.45, 0, 0.15, 1) var(--logo-wait, 0s) backwards;
+}
+.logo-reveal .logo-side {
+  animation: logo-depth 0.8s linear var(--logo-wait, 0s) backwards;
+}
+.logo-reveal .logo-lines > * {
+  transform-origin: 0 50%;
+  animation: logo-draw 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)
+    calc(var(--logo-wait, 0s) + 0.6s + var(--n) * 70ms) backwards;
+}
+.logo-reveal .logo-bars > * {
+  transform-origin: 50% 100%;
+  animation: logo-grow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)
+    calc(var(--logo-wait, 0s) + 0.6s + var(--n) * 70ms) backwards;
+}
+.logo-reveal .logo-word {
+  animation: logo-word 0.45s ease-out calc(var(--logo-wait, 0s) + 0.7s) backwards;
+}
+@keyframes logo-turn {
+  from {
+    transform: rotateY(-80deg) rotateX(8deg);
+  }
+}
+@keyframes logo-join-c {
+  from {
+    transform: translateX(-0.35em);
+  }
+}
+@keyframes logo-join-d {
+  from {
+    transform: translateX(0.35em);
+  }
+}
+/* El grosor se aplana al quedar de frente, para terminar idéntico al logo. */
+@keyframes logo-depth {
+  from,
+  75% {
+    visibility: visible;
+    transform: translateZ(calc(var(--i) * -0.03em));
+  }
+  to {
+    visibility: visible;
+    transform: translateZ(0);
+  }
+}
+@keyframes logo-draw {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes logo-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+@keyframes logo-word {
+  from {
+    opacity: 0;
+    transform: translateX(-0.2em);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-reveal * {
+    animation: none;
+  }
+}
 nav {
   display: flex;
   gap: 27px;
@@ -1025,6 +1157,9 @@ footer > span:last-child {
   }
   .brand {
     font-size: 20px;
+  }
+  .logo {
+    font-size: 30px;
   }
   .header-actions {
     gap: 0;

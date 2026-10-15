@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { LogoReveal } from "@/components/public/logo-reveal";
 import { DEFAULT_STYLE, STYLE_IDS, STYLE_KEY, isStyle, type StyleId } from "@/lib/styles";
 
 type Labels = {
@@ -30,15 +31,7 @@ export function useStyle() {
 const SWATCH: Record<StyleId, string> = { templo: "t1", ejecutivo: "t2", noche: "t3" };
 
 // Guarda el estilo elegido, lo escribe en <html data-style> y ofrece la ventana para cambiarlo.
-export function StyleProvider({
-  labels,
-  brand,
-  children,
-}: {
-  labels: Labels;
-  brand: string;
-  children: React.ReactNode;
-}) {
+export function StyleProvider({ labels, children }: { labels: Labels; children: React.ReactNode }) {
   const [style, setStyleState] = useState<StyleId>(DEFAULT_STYLE);
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(false);
@@ -66,12 +59,13 @@ export function StyleProvider({
     (id: StyleId) => {
       if (id === style) return;
       if (matchMedia("(prefers-reduced-motion: reduce)").matches) return apply(id);
+      // El telón sube, el logo se anima entero sobre él y recién entonces se abre al nuevo estilo.
       setPhase("in");
+      setTimeout(() => apply(id), 560);
       setTimeout(() => {
-        apply(id);
         setPhase("out");
         setTimeout(() => setPhase(""), 560);
-      }, 560);
+      }, 2000);
     },
     [style, apply],
   );
@@ -136,7 +130,7 @@ export function StyleProvider({
         </div>
       )}
       <div className={`curtain ${phase}`} aria-hidden="true">
-        {brand}
+        {phase && <LogoReveal replay />}
       </div>
     </StyleCtx.Provider>
   );

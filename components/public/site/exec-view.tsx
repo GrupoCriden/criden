@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  brand,
   content,
   members,
   cridenProjects,
@@ -9,6 +10,7 @@ import {
 } from "@/lib/content";
 import { ProjectVisual } from "@/components/public";
 import { Avatar } from "@/components/public/avatar";
+import { LogoReveal } from "@/components/public/logo-reveal";
 import { StyleButton } from "@/components/public/site/style-provider";
 
 // Portada tradicional (estilos Ejecutivo y Noche). Es la versión que leen los buscadores y los
@@ -22,8 +24,8 @@ export function ExecView({ lang }: { lang: Lang }) {
     <div className="xv" lang={lang}>
       <header className="xv-h">
         <div className="xv-w">
-          <Link className="xv-brand" href={`/${lang}`}>
-            CRIDEN
+          <Link className="xv-brand" href={`/${lang}`} aria-label={brand}>
+            <LogoReveal />
           </Link>
           <nav className="xv-nav" aria-label={t.nav[0]}>
             {t.nav.map((n, i) => (

@@ -1,0 +1,1105 @@
+/* Recorrido vertical: paisaje continuo y escenas a pantalla completa. */
+.tp.tp-trail {
+  --c-mFar: #a58bc4;
+  --c-mMid: #7467ad;
+  --c-mNear: #3f4f8c;
+  --c-hill1: #2b4670;
+  --c-hill2: #1e3b61;
+  --c-water: #8fb1dc;
+  --c-bank: #14304f;
+  --c-far: #9d86c2;
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  min-height: 100vh;
+  overflow: visible;
+  overflow-x: clip;
+  background: none;
+}
+.tp-trail .sky {
+  z-index: 0;
+  background: none;
+}
+.tp-trail .tr-hero {
+  position: relative;
+}
+/* La capa queda fija sobre las escenas para que las nubes sigan visibles durante el recorrido. */
+.tp-trail .tr-cloud-layer {
+  position: fixed;
+  z-index: 3;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: clamp(150px, 30svh, 300px);
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+}
+/* Nubes: cruzan de derecha a izquierda, cada plano a su velocidad */
+/* Nubes orgánicas en capas CSS, sin el recorte que creaba bloques. */
+.tp-trail .tr-cloud {
+  position: absolute;
+  left: 0;
+  width: var(--w);
+  height: calc(var(--w) * 0.3);
+  z-index: 2;
+  opacity: var(--o);
+  background:
+    radial-gradient(
+      ellipse 17% 48% at 14% 62%,
+      rgb(255 239 233 / 0.76) 18%,
+      rgb(255 218 225 / 0.55) 57%,
+      transparent 100%
+    ),
+    radial-gradient(
+      ellipse 18% 58% at 29% 51%,
+      rgb(255 239 229 / 0.84) 18%,
+      rgb(255 220 225 / 0.58) 58%,
+      transparent 100%
+    ),
+    radial-gradient(
+      ellipse 17% 56% at 45% 43%,
+      rgb(255 245 228 / 0.86) 18%,
+      rgb(255 222 226 / 0.56) 58%,
+      transparent 100%
+    ),
+    radial-gradient(
+      ellipse 17% 50% at 61% 50%,
+      rgb(255 238 231 / 0.8) 18%,
+      rgb(255 214 224 / 0.55) 58%,
+      transparent 100%
+    ),
+    radial-gradient(
+      ellipse 15% 43% at 77% 61%,
+      rgb(255 240 236 / 0.72) 18%,
+      rgb(248 207 226 / 0.48) 58%,
+      transparent 100%
+    ),
+    radial-gradient(ellipse 11% 34% at 91% 71%, rgb(255 232 235 / 0.58) 18%, transparent 100%),
+    radial-gradient(ellipse 51% 36% at 50% 78%, rgb(151 119 177 / 0.42) 12%, transparent 100%);
+  background-repeat: no-repeat;
+  animation: tr-cloud-drift var(--speed) linear infinite;
+  animation-delay: var(--delay);
+  translate: var(--parallax-x, 0px) var(--parallax-y, 0px);
+  transition: translate 900ms cubic-bezier(0.2, 0.7, 0.25, 1);
+  will-change: transform;
+  filter: blur(var(--cloud-blur, 1.8px));
+}
+.tp-trail .tr-cloud--far {
+  --o: 0.42;
+  --speed: 150s;
+  --cloud-blur: 2.8px;
+}
+.tp-trail .tr-cloud--middle {
+  --o: 0.52;
+  --speed: 100s;
+  --cloud-blur: 1.8px;
+}
+.tp-trail .tr-cloud--near {
+  --o: 0.6;
+  --speed: 72s;
+  --cloud-blur: 1.2px;
+}
+.tp-trail.night .tr-cloud {
+  opacity: calc(var(--o) * 0.35);
+}
+@keyframes tr-cloud-drift {
+  from {
+    transform: translate3d(110vw, 0, 0);
+  }
+  to {
+    transform: translate3d(calc(-1 * var(--w) - 20px), 0, 0);
+  }
+}
+/* El viento suma un desplazamiento independiente al recorrido continuo de cada nube. */
+.tp-trail.is-gusting .tr-cloud--far {
+  translate: calc(var(--parallax-x, 0px) - 22vw) var(--parallax-y, 0px);
+}
+.tp-trail.is-gusting .tr-cloud--middle {
+  translate: calc(var(--parallax-x, 0px) - 32vw) var(--parallax-y, 0px);
+}
+.tp-trail.is-gusting .tr-cloud--near {
+  translate: calc(var(--parallax-x, 0px) - 42vw) var(--parallax-y, 0px);
+}
+.tp-trail .tr-cloud-layer::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  inset: 3% 0 42%;
+  pointer-events: none;
+  opacity: 0;
+  background: repeating-linear-gradient(
+    168deg,
+    transparent 0 11%,
+    rgb(255 245 243 / 0.26) 11.1% 11.2%,
+    transparent 11.35% 19%
+  );
+}
+.tp-trail.is-gusting .tr-cloud-layer::after {
+  animation: tr-gust-streak 1.2s ease-out both;
+}
+@keyframes tr-gust-streak {
+  0% {
+    opacity: 0;
+    transform: translateX(14vw);
+  }
+  18% {
+    opacity: 0.48;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-22vw);
+  }
+}
+
+/* La escena tiene su propio recorte transparente: el cielo y sus efectos quedan en capas aparte. */
+.tp-trail .tr-landscape {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+}
+.tp-trail .tr-landscape img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  translate: var(--parallax-x, 0px) var(--parallax-y, 0px);
+}
+@media (max-aspect-ratio: 1/1) {
+  .tp-trail .tr-landscape img {
+    object-position: center top;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tp-trail .tr-cloud {
+    display: none;
+  }
+  .tp-trail .tr-hall-guest,
+  .tp-trail .tr-hall-guest svg {
+    animation: none;
+  }
+}
+
+/* Cabecera: marca, ráfaga y botón de estilo */
+.tp-trail .hud {
+  align-items: center;
+}
+.tp-trail .tr-wind-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.tp-trail .tr-wind-btn svg {
+  flex: none;
+}
+.tp-trail .tr-wind-btn:disabled {
+  cursor: wait;
+  opacity: 0.8;
+}
+.tp-trail .tr-brand {
+  position: relative;
+  display: block;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 2px 13px 2px 11px;
+  line-height: 0;
+  background: linear-gradient(135deg, rgb(34 27 56 / 0.9), rgb(13 28 51 / 0.88));
+  backdrop-filter: blur(12px) saturate(1.18);
+  border: 1px solid rgb(255 220 188 / 0.72);
+  border-radius: 11px;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.12),
+    0 6px 22px rgb(10 12 32 / 0.3),
+    0 0 18px rgb(235 139 177 / 0.16);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+.tp-trail .tr-brand::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 12% 50%, rgb(244 164 194 / 0.24), transparent 58%),
+    linear-gradient(115deg, rgb(255 233 195 / 0.08), transparent 54%);
+}
+.tp-trail .tr-brand .logo {
+  position: relative;
+  z-index: 1;
+  --logo-navy: #fff1d9;
+  --logo-blue: #f2a7c3;
+  font-size: 34px;
+}
+.tp-trail .tr-brand:hover {
+  border-color: rgb(255 230 156 / 0.95);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.16),
+    0 7px 24px rgb(10 12 32 / 0.36),
+    0 0 24px rgb(245 172 195 / 0.24);
+}
+.tp-trail .tr-brand:focus-visible {
+  outline: 3px solid #ffe69c;
+  outline-offset: 4px;
+}
+
+/* Mensaje principal, centrado en la primera pantalla */
+.tp-trail .tr-hero {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 96px 18px 48px;
+}
+.tp-trail .tr-card {
+  width: min(880px, 100%);
+  padding: 40px 48px 44px;
+  text-align: center;
+  background: rgb(32 40 63 / 0.78);
+  backdrop-filter: blur(4px) saturate(0.94);
+  border: 1px solid #d9ac4c;
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgb(8 12 30 / 0.45);
+}
+/* El recuadro queda por encima de los pétalos (z-index 2) */
+.tp-trail .tr-card {
+  position: relative;
+  z-index: 3;
+  transition:
+    transform 720ms cubic-bezier(0.22, 0.75, 0.28, 1),
+    opacity 600ms ease,
+    filter 720ms ease;
+}
+.tp-trail.is-gusting .tr-card {
+  transform: translate3d(-18vw, 0, 0) scale(0.98);
+  opacity: 0;
+  filter: blur(4px);
+  pointer-events: none;
+}
+.tp-trail .tr-card .k {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  font: 700 13px var(--sans);
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 18px;
+}
+.tp-trail .tr-card .k::before,
+.tp-trail .tr-card .k::after {
+  content: "";
+  flex: 0 1 60px;
+  height: 1px;
+  background: rgb(232 184 74 / 0.5);
+}
+.tp-trail .tr-card h1 {
+  font: 800 clamp(34px, 5.6vw, 68px) / 1.04 var(--serif);
+  letter-spacing: 0;
+  margin: 0 0 26px;
+  color: #fff;
+  text-wrap: balance;
+}
+/* Frase destacada: dorada, con un trazo rojo debajo */
+.tp-trail .tr-card h1 em {
+  font-style: normal;
+  color: var(--gold);
+  padding-bottom: 0.12em;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 12' preserveAspectRatio='none'%3E%3Cpath d='M4 8C70 3 150 3 296 6' fill='none' stroke='%23d6322b' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E")
+    center bottom / 62% 0.16em no-repeat;
+}
+.tp-trail .tr-lead {
+  max-width: 34em;
+  margin: 0 auto 28px;
+  font-size: clamp(16px, 1.7vw, 21px);
+  line-height: 1.5;
+  color: #d9deea;
+}
+.tp-trail .tr-lead b {
+  color: #fff;
+}
+.tp-trail .tr-services {
+  list-style: none;
+  margin: 0 0 30px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.tp-trail .tr-services li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0 16px;
+  font-size: 14px;
+  line-height: 1.35;
+  color: #c9cfdd;
+}
+.tp-trail .tr-services li + li {
+  border-left: 1px solid rgb(255 255 255 / 0.16);
+}
+.tp-trail .tr-services b {
+  font-size: 16px;
+  color: #fff;
+  text-wrap: balance;
+}
+.tp-trail .tr-services li > span:last-child {
+  max-width: 13em;
+}
+.tp-trail .tr-ico {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 10px;
+  border: 1.5px solid;
+  border-radius: 12px;
+}
+.tp-trail .tr-services li:nth-child(3n + 1) .tr-ico {
+  color: #ffc2d6;
+  background: rgb(214 80 120 / 0.28);
+}
+.tp-trail .tr-services li:nth-child(3n + 2) .tr-ico {
+  color: #c9d2ff;
+  background: rgb(90 100 220 / 0.32);
+}
+.tp-trail .tr-services li:nth-child(3n) .tr-ico {
+  color: var(--gold);
+  background: rgb(232 184 74 / 0.2);
+}
+.tp-trail .tr-cta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+}
+.tp-trail .tr-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 72px;
+  min-width: min(300px, 100%);
+  padding: 12px 28px;
+  text-align: left;
+  text-decoration: none;
+  font-size: 13px;
+  color: #f6dcd9;
+  background: var(--red);
+  border: 1.5px solid var(--red);
+  border-radius: 8px;
+  box-shadow: 0 4px 0 #8f1f1a;
+}
+.tp-trail .tr-btn:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #8f1f1a;
+}
+.tp-trail .tr-btn.alt {
+  color: #c9cfdd;
+  background: none;
+  border-color: #fff;
+  box-shadow: none;
+}
+.tp-trail .tr-btn.alt:hover {
+  background: rgb(255 255 255 / 0.08);
+}
+.tp-trail .tr-btn svg {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tp-trail .tr-btn b {
+  display: block;
+  font-size: 17px;
+  color: #fff;
+}
+
+/* Cada sala conserva la ilustración y vuelve a mostrar el contenido funcional generado en halls.ts. */
+.tp-trail .tr-stop {
+  /* Proporción (ancho / alto) de la ilustración horizontal; las zonas de clic la usan. */
+  --img-ar: 1.7778;
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  justify-items: end;
+  align-content: center;
+  gap: 18px;
+  padding: clamp(124px, 15svh, 164px) clamp(18px, 6vw, 88px) 44px;
+  scroll-margin-top: 40px;
+}
+.tp-trail .tr-scene {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  margin: 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 14%, #000 86%, transparent 100%);
+}
+.tp-trail .tr-scene picture,
+.tp-trail .tr-scene img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.tp-trail .tr-scene img {
+  object-fit: cover;
+  object-position: center;
+}
+.tp-trail .tr-scene-heading {
+  position: absolute;
+  z-index: 5;
+  top: clamp(92px, 11svh, 124px);
+  left: clamp(18px, 6vw, 88px);
+  max-width: calc(100% - 36px);
+  margin: 0;
+  pointer-events: none;
+}
+.tp-trail .tr-scene-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 8px 16px 8px 9px;
+  border: 1px solid rgb(232 184 74 / 0.9);
+  border-radius: 7px;
+  background: rgb(25 24 43 / 0.88);
+  box-shadow: 0 5px 18px rgb(0 0 0 / 0.34);
+  color: #fff8e7;
+  font: inherit;
+  text-align: left;
+  white-space: nowrap;
+}
+.tp-trail .tr-scene-label span {
+  display: grid;
+  flex: 0 0 auto;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border-radius: 4px;
+  background: #bd2738;
+  color: white;
+  font: 700 13px/1 var(--serif);
+}
+.tp-trail .tr-scene-label strong {
+  overflow: hidden;
+  font: 700 clamp(15px, 2vw, 19px) / 1.1 var(--serif);
+  text-overflow: ellipsis;
+}
+/* Capa del mismo tamaño que la ilustración (toda la sala, sin su relleno): sirve de referencia
+   para medir la imagen y colocar la zona de clic. */
+.tp-trail .tr-scene-zone {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  container-type: size;
+  pointer-events: none;
+}
+.tp-trail .tr-scene-target {
+  position: absolute;
+  pointer-events: auto;
+  /* La imagen cubre la sala recortándose (object-fit: cover). Se calcula su tamaño real para que
+     la zona siga al edificio con cualquier proporción de pantalla. */
+  --img-w: max(100cqw, 100cqh * var(--img-ar));
+  --img-h: max(100cqh, 100cqw / var(--img-ar));
+  top: calc(50% + var(--img-h) * (var(--y) - 0.5));
+  left: calc(50% + var(--img-w) * (var(--x) - 0.5));
+  width: calc(var(--img-w) * var(--w));
+  height: calc(var(--img-h) * var(--h));
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+.tp-trail .tr-scene-target:hover {
+  background: rgb(255 226 164 / 0.06);
+  box-shadow: inset 0 0 0 2px rgb(255 226 164 / 0.55);
+}
+.tp-trail .tr-scene-target:focus-visible {
+  outline: 3px solid #ffe69c;
+  outline-offset: 3px;
+  background: rgb(255 226 164 / 0.08);
+  box-shadow: inset 0 0 0 2px rgb(255 226 164 / 0.72);
+}
+.tp-trail .tr-scene-target--puerta {
+  --x: 0.26;
+  --y: 0.09;
+  --w: 0.48;
+  --h: 0.59;
+}
+.tp-trail .tr-scene-target--nosotros {
+  --x: 0.18;
+  --y: 0.13;
+  --w: 0.66;
+  --h: 0.53;
+}
+.tp-trail .tr-scene-target--proyectos {
+  --x: 0.14;
+  --y: 0.12;
+  --w: 0.66;
+  --h: 0.5;
+}
+.tp-trail .tr-scene-target--equipo {
+  --x: 0.34;
+  --y: 0.21;
+  --w: 0.49;
+  --h: 0.4;
+}
+.tp-trail .tr-scene-target--contacto {
+  --x: 0.23;
+  --y: 0.43;
+  --w: 0.55;
+  --h: 0.22;
+}
+.tp-trail .tr-hall-guests {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.tp-trail .tr-hall-guest {
+  position: absolute;
+  display: block;
+  width: var(--guest-size);
+  line-height: 0;
+  opacity: 0.8;
+  filter: drop-shadow(0 2px 5px rgb(10 12 24 / 0.42));
+  transform-origin: center bottom;
+  animation: tr-guest-walk var(--guest-duration) ease-in-out var(--guest-delay) infinite alternate;
+  will-change: transform;
+}
+.tp-trail .tr-hall-guest svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  animation: tr-guest-step 520ms ease-in-out var(--guest-delay) infinite alternate;
+}
+@keyframes tr-guest-walk {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(var(--guest-travel), 0, 0);
+  }
+}
+@keyframes tr-guest-step {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 -2px;
+  }
+}
+.tp-trail .tr-room-dialog {
+  position: fixed;
+  isolation: isolate;
+  inset: 0;
+  width: min(860px, calc(100vw - 32px));
+  height: fit-content;
+  max-width: none;
+  max-height: min(90vh, 920px);
+  max-height: min(90dvh, 920px);
+  margin: auto;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+.tp-trail .tr-room-dialog::backdrop {
+  background: rgb(9 12 28 / 0.48);
+  backdrop-filter: blur(5px) saturate(0.82);
+  -webkit-backdrop-filter: blur(5px) saturate(0.82);
+}
+.tp-trail .tr-room-dialog-inner {
+  position: relative;
+  z-index: 1;
+  max-height: min(90vh, 920px);
+  max-height: min(90dvh, 920px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  border-radius: 16px;
+  scrollbar-color: rgb(232 184 74 / 0.72) rgb(18 25 43 / 0.8);
+}
+.tp-trail .tr-room-ambience {
+  box-sizing: border-box;
+  display: flex;
+  width: min(740px, 100%);
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 auto 12px;
+  padding: 9px 64px 9px 13px;
+  border: 1px solid rgb(232 184 74 / 0.5);
+  border-radius: 10px;
+  background: linear-gradient(110deg, rgb(22 29 48 / 0.94), rgb(49 40 56 / 0.88));
+  color: #fff5e4;
+  box-shadow: 0 5px 18px rgb(8 10 20 / 0.26);
+}
+.tp-trail .tr-room-ambience-toggle {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  border: 1px solid rgb(255 230 156 / 0.64);
+  border-radius: 8px;
+  background: rgb(185 44 57 / 0.9);
+  color: #fff8ed;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.tp-trail .tr-room-ambience-toggle:hover {
+  background: #cf3a39;
+}
+.tp-trail .tr-room-ambience-toggle:focus-visible,
+.tp-trail .tr-room-ambience-volume input:focus-visible {
+  outline: 3px solid #ffe69c;
+  outline-offset: 3px;
+}
+.tp-trail .tr-room-ambience-volume {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #f3e7d7;
+  font-size: 12px;
+  font-weight: 600;
+}
+.tp-trail .tr-room-ambience-volume input {
+  width: 126px;
+  accent-color: #e8b84a;
+  cursor: pointer;
+}
+.tp-trail .tr-room-close {
+  position: absolute;
+  z-index: 8;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid rgb(255 230 156 / 0.8);
+  border-radius: 50%;
+  background: rgb(20 25 44 / 0.92);
+  color: #fff5e4;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.34);
+}
+.tp-trail .tr-room-close:hover {
+  background: #b92c39;
+}
+.tp-trail .tr-room-content {
+  position: relative;
+  z-index: 6;
+  width: min(740px, 100%);
+  flex: none;
+  margin: 0;
+  padding: clamp(24px, 3.2vw, 40px);
+  overflow: visible;
+  border: 1px solid rgb(255 220 156 / 0.78);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgb(25 27 48 / 0.88), rgb(26 39 59 / 0.82));
+  color: #fff4df;
+  box-shadow:
+    0 22px 56px rgb(9 13 29 / 0.4),
+    inset 0 1px 0 rgb(255 255 255 / 0.14);
+  backdrop-filter: blur(12px) saturate(0.82);
+  -webkit-backdrop-filter: blur(12px) saturate(0.82);
+  margin-inline: auto;
+}
+.tp-trail .tr-room-content::before {
+  z-index: 0;
+  opacity: 0.44;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse at 12% 0%, rgb(246 177 197 / 0.2), transparent 52%),
+    repeating-linear-gradient(0deg, rgb(255 235 210 / 0.025) 0 1px, transparent 1px 5px);
+}
+.tp-trail .tr-room-content .kicker {
+  color: #ffd17a;
+}
+.tp-trail .tr-room-content h2 {
+  color: #fff7e9;
+}
+.tp-trail .tr-room-content p {
+  color: #e5e4eb;
+}
+.tp-trail .tr-room-content .stamp {
+  background: #c63b43;
+  box-shadow:
+    inset 0 0 0 3px rgb(255 255 255 / 0.36),
+    0 5px 14px rgb(0 0 0 / 0.2);
+}
+.tp-trail .tr-room-content .services div,
+.tp-trail .tr-room-content .pillars div {
+  border-left-color: #f0bd62;
+  background: rgb(255 247 234 / 0.09);
+  color: #e5e4eb;
+}
+.tp-trail .tr-room-content .services b,
+.tp-trail .tr-room-content .pillars b,
+.tp-trail .tr-room-content .masters b {
+  color: #fff7e9;
+}
+.tp-trail .tr-room-content .sc,
+.tp-trail .tr-room-content .m {
+  border-color: rgb(239 191 112 / 0.68);
+  background: rgb(12 22 42 / 0.63);
+  color: #e8e6ed;
+}
+.tp-trail .tr-room-content .sc::before {
+  background: linear-gradient(#75543f, #39271f);
+}
+.tp-trail .tr-room-content .sc h3 {
+  color: #fff3d8;
+}
+.tp-trail .tr-room-content .tags span {
+  border-color: rgb(255 218 156 / 0.6);
+  background: rgb(255 247 234 / 0.11);
+  color: #fff4df;
+}
+.tp-trail .tr-room-content .tags .soon {
+  border-color: #d64b4a;
+  background: #b92c39;
+}
+.tp-trail .tr-room-content .m span {
+  color: #dedde7;
+}
+.tp-trail .tr-room-content .go.alt {
+  border-color: rgb(255 238 212 / 0.78);
+  color: #fff4df;
+}
+.tp-trail .tr-room-content .lnk {
+  color: #ffd17a;
+}
+.tp-trail .tr-room-content :focus-visible {
+  outline-color: #ffe69c;
+}
+@media (max-width: 720px) {
+  .tp-trail .tr-hero {
+    padding: 86px 12px 24px;
+  }
+  .tp-trail .tr-card {
+    box-sizing: border-box;
+    width: min(100%, 560px);
+    max-width: 100%;
+    padding: 22px 18px 24px;
+  }
+  .tp-trail .tr-card .k {
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 10px;
+    letter-spacing: 2px;
+  }
+  .tp-trail .tr-card h1 {
+    font-size: clamp(30px, 8vw, 38px);
+    overflow-wrap: anywhere;
+  }
+  .tp-trail .tr-lead {
+    margin-bottom: 20px;
+    font-size: 15px;
+  }
+  .tp-trail .tr-services {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+  .tp-trail .tr-services li {
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 0;
+    text-align: left;
+  }
+  .tp-trail .tr-services li + li {
+    padding-top: 12px;
+    border-top: 1px solid rgb(255 255 255 / 0.16);
+    border-left: 0;
+  }
+  .tp-trail .tr-services li > span:last-child {
+    max-width: none;
+  }
+  .tp-trail .tr-services b {
+    font-size: 15px;
+  }
+  .tp-trail .tr-ico {
+    box-sizing: border-box;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    margin: 0;
+  }
+  .tp-trail .tr-cta {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .tp-trail .tr-btn {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    padding: 12px 16px;
+  }
+  .tp-trail .tr-room-ambience {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 8px 12px;
+    margin-bottom: 10px;
+    padding: 9px 52px 9px 10px;
+  }
+  .tp-trail .tr-room-ambience-toggle {
+    font-size: 12px;
+  }
+  .tp-trail .tr-room-ambience-volume input {
+    width: min(120px, 30vw);
+  }
+  .tp-trail .tr-hall-guest:nth-child(even) {
+    display: none;
+  }
+  .tp-trail .tr-stop {
+    justify-items: stretch;
+    align-content: start;
+    gap: 18px;
+    padding: 126px 14px 34px;
+  }
+  .tp-trail .tr-scene-label {
+    white-space: normal;
+  }
+}
+@media (max-width: 900px), (max-aspect-ratio: 1/1) {
+  /* Aquí se usa la ilustración vertical (misma condición que el <source> de trail.tsx). */
+  .tp-trail .tr-stop {
+    --img-ar: 0.5628;
+  }
+  .tp-trail .tr-cloud-layer {
+    height: clamp(132px, 28svh, 250px);
+  }
+  .tp-trail .tr-cloud {
+    width: min(var(--w), 48vw);
+    height: auto;
+    aspect-ratio: 10 / 3;
+  }
+  .tp-trail .tr-scene-target--puerta {
+    --x: 0.11;
+    --y: 0.29;
+    --w: 0.78;
+    --h: 0.35;
+  }
+  .tp-trail .tr-scene-target--nosotros {
+    --x: 0.09;
+    --y: 0.3;
+    --w: 0.84;
+    --h: 0.26;
+  }
+  .tp-trail .tr-scene-target--proyectos {
+    --x: 0.16;
+    --y: 0.3;
+    --w: 0.76;
+    --h: 0.26;
+  }
+  .tp-trail .tr-scene-target--equipo {
+    --x: 0.22;
+    --y: 0.33;
+    --w: 0.7;
+    --h: 0.22;
+  }
+  .tp-trail .tr-scene-target--contacto {
+    --x: 0.14;
+    --y: 0.43;
+    --w: 0.74;
+    --h: 0.14;
+  }
+}
+@media (max-width: 720px) {
+  .tp-trail .tr-scene-heading {
+    top: 88px;
+    left: 14px;
+    max-width: calc(100% - 28px);
+  }
+  .tp-trail .tr-room-dialog {
+    width: calc(100vw - 20px);
+    max-height: 92vh;
+    max-height: 92dvh;
+  }
+  .tp-trail .tr-room-dialog-inner {
+    max-height: 92vh;
+    max-height: 92dvh;
+    border-radius: 13px;
+  }
+  .tp-trail .tr-room-close {
+    top: 8px;
+    right: 8px;
+    width: 42px;
+    height: 42px;
+  }
+  .tp-trail .tr-room-content {
+    width: 100%;
+    padding: 22px 18px 24px;
+    border-radius: 13px;
+  }
+  .tp-trail .tr-room-content .stamp {
+    width: 52px;
+    height: 52px;
+    font-size: 30px;
+  }
+  .tp-trail .tr-room-content .m {
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px;
+  }
+  .tp-trail .tr-room-content .m .av {
+    width: 52px;
+    height: 52px;
+  }
+  .tp-trail .tr-room-content .m b {
+    font-size: 17px;
+  }
+  .tp-trail .tr-room-content .m span {
+    font-size: 13px;
+  }
+  .tp-trail .tr-room-content .go {
+    max-width: 100%;
+    padding: 11px 14px;
+    font-size: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tp-trail .tr-scene img {
+    transition: none;
+  }
+}
+
+/* Pétalos (petals.ts): tres planos de profundidad; caen con deriva, se mecen y se voltean */
+.tp-trail .petals {
+  z-index: 4;
+  perspective: 800px;
+}
+.tp-trail .petal {
+  position: absolute;
+  top: -50px;
+  left: var(--left);
+  width: var(--size);
+  opacity: var(--opacity);
+  transition:
+    left 760ms cubic-bezier(0.22, 0.75, 0.28, 1),
+    opacity 600ms ease;
+  animation: tr-petal-fall var(--duration) linear infinite;
+  animation-delay: var(--delay);
+  will-change: transform;
+}
+.tp-trail.is-gusting .petal {
+  left: calc(var(--left) - 135vw);
+  opacity: 0;
+}
+.tp-trail .petal__sway {
+  display: block;
+  width: 100%;
+  animation: tr-petal-sway var(--sway-duration) ease-in-out infinite alternate;
+}
+.tp-trail .petal__flip {
+  display: block;
+  width: 100%;
+  transform-style: preserve-3d;
+  animation: tr-petal-flip var(--flip-duration) ease-in-out infinite alternate;
+}
+.tp-trail .petal svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.tp-trail .petal--back {
+  filter: blur(0.45px);
+}
+.tp-trail .petal--middle {
+  filter: drop-shadow(0 1px 1px #6b345526);
+}
+.tp-trail .petal--front {
+  filter: blur(var(--blur));
+}
+@keyframes tr-petal-fall {
+  0% {
+    transform: translate3d(0, -5vh, 0) rotateZ(0deg);
+  }
+  25% {
+    transform: translate3d(calc(var(--drift) * 0.25 + 14px), 25vh, 0) rotateZ(75deg);
+  }
+  50% {
+    transform: translate3d(calc(var(--drift) * 0.5 - 17px), 55vh, 0) rotateZ(170deg);
+  }
+  75% {
+    transform: translate3d(calc(var(--drift) * 0.75 + 22px), 85vh, 0) rotateZ(285deg);
+  }
+  100% {
+    transform: translate3d(var(--drift), 120vh, 0) rotateZ(405deg);
+  }
+}
+@keyframes tr-petal-sway {
+  0% {
+    transform: translateX(-16px);
+  }
+  50% {
+    transform: translateX(8px);
+  }
+  100% {
+    transform: translateX(19px);
+  }
+}
+@keyframes tr-petal-flip {
+  0% {
+    transform: rotateY(-70deg) rotateX(15deg);
+  }
+  50% {
+    transform: rotateY(20deg) rotateX(-30deg);
+  }
+  100% {
+    transform: rotateY(110deg) rotateX(35deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tp-trail .tr-scene img {
+    transition: none;
+  }
+  .tp-trail .tr-card,
+  .tp-trail .petal,
+  .tp-trail .tr-hall-guest,
+  .tp-trail .tr-hall-guest svg {
+    transition: none;
+    animation: none;
+    will-change: auto;
+  }
+}
