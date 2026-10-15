@@ -215,6 +215,18 @@
         "process": {
           "label": "Cómo trabajamos"
         }
+      },
+      "weather": {
+        "label": "Clima",
+        "change": "Cambiar el clima",
+        "modes": {
+          "clear": "Despejado",
+          "wind": "Viento",
+          "rain": "Lluvia",
+          "storm": "Tormenta",
+          "snow": "Nieve",
+          "fireflies": "Luciérnagas"
+        }
       }
     },
     "quote": {
@@ -465,6 +477,18 @@
         },
         "process": {
           "label": "How we work"
+        }
+      },
+      "weather": {
+        "label": "Weather",
+        "change": "Change the weather",
+        "modes": {
+          "clear": "Clear",
+          "wind": "Windy",
+          "rain": "Rain",
+          "storm": "Storm",
+          "snow": "Snow",
+          "fireflies": "Fireflies"
         }
       }
     },

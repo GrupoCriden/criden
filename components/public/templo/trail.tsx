@@ -11,6 +11,11 @@ import {
   MessageCircle,
   Volume2,
   VolumeX,
+  CloudLightning,
+  CloudRain,
+  Snowflake,
+  Sparkles,
+  Sun,
   Wind,
   X,
 } from "lucide-react";
@@ -19,6 +24,7 @@ import { StyleButton } from "@/components/public/site/style-provider";
 import { PAINT, keyed } from "./engine";
 import { buildHalls, HALL_IDS } from "./halls";
 import { mountPetals } from "./petals";
+import { WEATHER_ORDER, mountWeather, type Weather } from "./weather";
 import { AboutRoom, ContactRoom, ProjectsRoom } from "./rooms";
 import { STOP_MEDIA, STOP_MEDIA_MOBILE } from "./trail-scenes";
 import type { HallId, TemploData } from "./types";
@@ -26,9 +32,20 @@ import "./templo.css";
 import "./trail.css";
 import "./trail-nav.css";
 import "./rooms.css";
+import "./weather.css";
 
 // Icono de cada servicio, en el orden de `services` del contenido.
 const SERVICE_ICONS = [AppWindow, Code, Bot];
+
+// Icono del botón según el clima actual.
+const WEATHER_ICON = {
+  clear: Sun,
+  wind: Wind,
+  rain: CloudRain,
+  storm: CloudLightning,
+  snow: Snowflake,
+  fireflies: Sparkles,
+};
 
 const HALL_VISITORS = [
   {
@@ -108,6 +125,7 @@ export default function Trail({ data }: { data: TemploData }) {
   // Sala que ocupa la pantalla mientras se recorre (null en la portada); alimenta la barra de salas.
   const [currentStop, setCurrentStop] = useState<HallId | null>(null);
   const st = t.templo.stations;
+  const wx = t.templo.weather;
   const activeRoom = activeHall ? halls.find((hall) => hall.id === activeHall) : null;
   const roomDialogRef = useRef<HTMLDialogElement>(null);
   const roomTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -116,9 +134,11 @@ export default function Trail({ data }: { data: TemploData }) {
   const [hallAmbienceOn, setHallAmbienceOn] = useState(false);
   const [hallAmbienceVolume, setHallAmbienceVolume] = useState(0.12);
 
-  const [gusting, setGusting] = useState(false);
-  const windStart = useRef<number | null>(null);
-  const windReset = useRef<number | null>(null);
+  // Clima: cada toque del botón pasa al siguiente (despejado, viento, lluvia, tormenta, nieve, luciérnagas).
+  const [weather, setWeather] = useState<Weather>("clear");
+  const WeatherIcon = WEATHER_ICON[weather];
+  const weatherCanvasRef = useRef<HTMLCanvasElement>(null);
+  const weatherRef = useRef<ReturnType<typeof mountWeather> | null>(null);
 
   // Lleva a cualquier sala: baja hasta ella y, si `open`, muestra su contenido sin pedir otro clic.
   // Si el cuadro ya está abierto, solo cambia de sala (sin cerrarlo ni volver a tocar botones).
@@ -145,16 +165,6 @@ export default function Trail({ data }: { data: TemploData }) {
     const from = activeHall ?? currentStop;
     const i = from ? HALL_IDS.indexOf(from) : dir === 1 ? -1 : HALL_IDS.length;
     goToHall(HALL_IDS[Math.min(Math.max(i + dir, 0), HALL_IDS.length - 1)], true);
-  };
-  const goToGate = (behavior: ScrollBehavior = "smooth") => {
-    const gate = ref.current?.querySelector<HTMLElement>("#templo-puerta");
-    if (!gate) return;
-    if (window.location.hash !== `#${gate.id}`) {
-      window.history.pushState(null, "", `#${gate.id}`);
-    }
-    gate.scrollIntoView({ behavior, block: "start" });
-    gate.focus({ preventScroll: true });
-    window.setTimeout(() => activateHall("puerta"), behavior === "auto" ? 0 : 650);
   };
   const startHallAmbience = () => {
     const audio = hallAudioRef.current;
@@ -209,23 +219,25 @@ export default function Trail({ data }: { data: TemploData }) {
     roomTriggerRef.current?.focus({ preventScroll: true });
     roomTriggerRef.current = null;
   };
-  const handleWind = () => {
-    if (gusting) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      goToGate("auto");
-      return;
-    }
-
-    setGusting(true);
-    windStart.current = window.setTimeout(() => {
-      goToGate();
-      windReset.current = window.setTimeout(() => {
-        setGusting(false);
-        windStart.current = null;
-        windReset.current = null;
-      }, 1700);
-    }, 760);
+  const nextWeather = () => {
+    const i = WEATHER_ORDER.indexOf(weather);
+    setWeather(WEATHER_ORDER[(i + 1) % WEATHER_ORDER.length]);
   };
+
+  // Monta la capa de partículas una vez y le pasa cada cambio de clima.
+  useEffect(() => {
+    const canvas = weatherCanvasRef.current;
+    if (!canvas) return;
+    const controller = mountWeather(canvas);
+    weatherRef.current = controller;
+    return () => {
+      controller.destroy();
+      weatherRef.current = null;
+    };
+  }, []);
+  useEffect(() => {
+    weatherRef.current?.set(weather);
+  }, [weather]);
 
   useEffect(() => {
     const dialog = roomDialogRef.current;
@@ -358,15 +370,13 @@ export default function Trail({ data }: { data: TemploData }) {
       motion.removeEventListener("change", onMotionChange);
       root.removeEventListener("pointermove", onPointerMove);
       root.removeEventListener("pointerleave", onPointerLeave);
-      if (windStart.current !== null) window.clearTimeout(windStart.current);
-      if (windReset.current !== null) window.clearTimeout(windReset.current);
       observer.disconnect();
       removePetals();
     };
   }, []);
 
   return (
-    <div className={"tp tp-trail" + (gusting ? " is-gusting" : "")} ref={ref} lang={lang}>
+    <div className="tp tp-trail" data-weather={weather} ref={ref} lang={lang}>
       <div className="sky" aria-hidden="true">
         {media.wide && (
           <picture className="tr-landscape">
@@ -402,6 +412,8 @@ export default function Trail({ data }: { data: TemploData }) {
         ))}
       </div>
       <div className="petals" aria-hidden="true" />
+      <div className="tr-weather-tint" aria-hidden="true" />
+      <canvas className="tr-weather-canvas" ref={weatherCanvasRef} aria-hidden="true" />
 
       <header className="hud">
         <Link className="tr-brand" href={`/${lang}`} aria-label={data.brand}>
@@ -410,16 +422,16 @@ export default function Trail({ data }: { data: TemploData }) {
         <div className="tools">
           <button
             type="button"
-            className="tr-wind-btn"
-            aria-label={hero.wind}
-            aria-controls="templo-puerta"
-            aria-busy={gusting}
-            disabled={gusting}
-            onClick={handleWind}
+            className="tr-wind-btn tr-weather-btn"
+            aria-label={`${wx.change}: ${wx.modes[weather]}`}
+            onClick={nextWeather}
           >
-            <Wind size={18} aria-hidden="true" />
-            <span>{hero.wind}</span>
+            <WeatherIcon size={18} aria-hidden="true" />
+            <span className="tr-weather-name">{wx.modes[weather]}</span>
           </button>
+          <span className="sr-only" role="status">
+            {wx.label}: {wx.modes[weather]}
+          </span>
           <StyleButton className="stylebtn" />
         </div>
       </header>

@@ -1,0 +1,77 @@
+/* Clima del Templo: tinte de la escena + capa de partículas (weather.ts) y botón para cambiarlo. */
+.tp-trail .tr-weather-tint {
+  position: fixed;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: rgb(20 30 60 / 0);
+  transition:
+    opacity 1.4s ease,
+    background-color 1.4s ease;
+}
+.tp-trail .tr-weather-canvas {
+  position: fixed;
+  z-index: 4;
+  inset: 0;
+  pointer-events: none;
+}
+/* Tinte por clima: oscurece o aclara el ambiente sin tocar los edificios */
+.tp-trail[data-weather="rain"] .tr-weather-tint {
+  opacity: 1;
+  background: linear-gradient(rgb(40 54 92 / 0.42), rgb(22 30 58 / 0.5));
+}
+.tp-trail[data-weather="storm"] .tr-weather-tint {
+  opacity: 1;
+  background: linear-gradient(rgb(14 18 44 / 0.62), rgb(8 10 28 / 0.7));
+}
+.tp-trail[data-weather="snow"] .tr-weather-tint {
+  opacity: 1;
+  background: linear-gradient(rgb(225 236 255 / 0.2), rgb(190 208 238 / 0.3));
+}
+.tp-trail[data-weather="fireflies"] .tr-weather-tint {
+  opacity: 1;
+  background: linear-gradient(rgb(10 14 58 / 0.5), rgb(6 8 38 / 0.62));
+}
+/* Los pétalos del fondo solo acompañan al día despejado y al viento */
+.tp-trail .petals {
+  transition: opacity 1.2s ease;
+}
+.tp-trail[data-weather="rain"] .petals,
+.tp-trail[data-weather="storm"] .petals,
+.tp-trail[data-weather="snow"] .petals,
+.tp-trail[data-weather="fireflies"] .petals {
+  opacity: 0;
+}
+/* Las nubes se oscurecen con lluvia y tormenta */
+.tp-trail[data-weather="rain"] .tr-cloud,
+.tp-trail[data-weather="storm"] .tr-cloud {
+  filter: brightness(0.55) saturate(0.7);
+}
+
+/* Botón del clima */
+.tp-trail .tr-weather-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 44px;
+}
+.tp-trail .tr-weather-btn svg {
+  flex: none;
+}
+.tp-trail .tr-weather-btn .tr-weather-name {
+  min-width: 5.2em;
+  text-align: left;
+}
+@media (max-width: 720px) {
+  .tp-trail .tr-weather-btn .tr-weather-name {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tp-trail .tr-weather-tint,
+  .tp-trail .petals {
+    transition: none;
+  }
+}
