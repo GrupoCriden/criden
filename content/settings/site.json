@@ -183,6 +183,34 @@
         "next": "Sala siguiente",
         "enter": "Entrar",
         "rooms": "Cambiar de sala"
+      },
+      "rooms": {
+        "projects": {
+          "filters": {
+            "all": "Todos",
+            "criden": "De Criden",
+            "bots": "Bots",
+            "systems": "Sistemas y web",
+            "ideas": "En definición"
+          },
+          "filterLabel": "Filtrar proyectos",
+          "kinds": {
+            "platform": "Plataforma web",
+            "travel": "Plataforma web",
+            "portfolio": "Experiencia web",
+            "bot": "Bot de Telegram",
+            "system": "Sistema web",
+            "sports": "Aplicación web",
+            "site": "Sitio web"
+          },
+          "summary": "{n} proyectos",
+          "viewSite": "Ver sitio",
+          "viewCode": "Código",
+          "empty": "No hay proyectos en esta categoría."
+        },
+        "process": {
+          "label": "Cómo trabajamos"
+        }
       }
     }
   },
@@ -369,6 +397,34 @@
         "next": "Next hall",
         "enter": "Enter",
         "rooms": "Switch hall"
+      },
+      "rooms": {
+        "projects": {
+          "filters": {
+            "all": "All",
+            "criden": "By Criden",
+            "bots": "Bots",
+            "systems": "Systems and web",
+            "ideas": "In definition"
+          },
+          "filterLabel": "Filter projects",
+          "kinds": {
+            "platform": "Web platform",
+            "travel": "Web platform",
+            "portfolio": "Web experience",
+            "bot": "Telegram bot",
+            "system": "Web system",
+            "sports": "Web app",
+            "site": "Website"
+          },
+          "summary": "{n} projects",
+          "viewSite": "View site",
+          "viewCode": "Code",
+          "empty": "There are no projects in this category."
+        },
+        "process": {
+          "label": "How we work"
+        }
       }
     }
   },

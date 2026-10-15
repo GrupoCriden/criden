@@ -29,7 +29,8 @@
     "tags": [],
     "visual": "matches",
     "screenshot": "",
-    "accent": ""
+    "accent": "#2f5d8a",
+    "kind": "platform"
   },
   {
     "slug": "aventura-que-conecta",
@@ -55,7 +56,8 @@
     "tags": [],
     "visual": "tours",
     "screenshot": "",
-    "accent": ""
+    "accent": "#b3531f",
+    "kind": "travel"
   },
   {
     "slug": "arquitectura-que-cobra-vida",
@@ -85,7 +87,8 @@
     },
     "visual": "arch",
     "screenshot": "",
-    "accent": ""
+    "accent": "#4a3d80",
+    "kind": "portfolio"
   },
   {
     "slug": "bot-caja-cercana",
@@ -116,7 +119,8 @@
     "tags": [],
     "visual": "",
     "screenshot": "",
-    "accent": ""
+    "accent": "#2f8a5a",
+    "kind": "bot"
   },
   {
     "slug": "bot-registro-cajas",
@@ -145,7 +149,8 @@
     "tags": [],
     "visual": "",
     "screenshot": "",
-    "accent": ""
+    "accent": "#2f8a5a",
+    "kind": "bot"
   },
   {
     "slug": "bot-reportes-telecom",
@@ -174,7 +179,8 @@
     "tags": [],
     "visual": "",
     "screenshot": "",
-    "accent": ""
+    "accent": "#2f8a5a",
+    "kind": "bot"
   },
   {
     "slug": "sistema-contable",
@@ -204,7 +210,8 @@
     "tags": [],
     "visual": "",
     "screenshot": "",
-    "accent": ""
+    "accent": "#c58a1c",
+    "kind": "system"
   },
   {
     "slug": "campeonato-futbol",
@@ -232,7 +239,8 @@
     "tags": [],
     "visual": "",
     "screenshot": "",
-    "accent": ""
+    "accent": "#d6322b",
+    "kind": "sports"
   },
   {
     "slug": "futbol-manager",
@@ -262,7 +270,8 @@
     "tags": [],
     "visual": "",
     "screenshot": "",
-    "accent": ""
+    "accent": "#d6322b",
+    "kind": "sports"
   },
   {
     "slug": "dennysh-com",
@@ -292,6 +301,7 @@
     "tags": [],
     "visual": "",
     "screenshot": "",
-    "accent": ""
+    "accent": "#6a4aa8",
+    "kind": "site"
   }
 ]
