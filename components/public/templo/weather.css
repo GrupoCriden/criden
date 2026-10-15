@@ -75,3 +75,61 @@
     transition: none;
   }
 }
+
+/* Sonido del clima: botón y panel con interruptor y volumen */
+.tp-trail .tr-sound {
+  position: relative;
+  display: inline-flex;
+}
+.tp-trail .tr-sound-panel {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  gap: 12px;
+  width: min(270px, calc(100vw - 24px));
+  padding: 14px 16px;
+  border: 1px solid rgb(232 184 74 / 0.85);
+  border-radius: 12px;
+  background: rgb(25 24 43 / 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.45);
+  color: #fff8e7;
+  text-align: left;
+}
+.tp-trail .tr-sound-switch,
+.tp-trail .tr-sound-volume {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font: 700 14px/1.2 var(--sans);
+  cursor: pointer;
+}
+.tp-trail .tr-sound-switch input {
+  width: 22px;
+  height: 22px;
+  accent-color: #c63b43;
+}
+.tp-trail .tr-sound-volume span {
+  flex: none;
+}
+.tp-trail .tr-sound-volume input {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  accent-color: #e8b84a;
+}
+.tp-trail .tr-sound-volume b {
+  flex: none;
+  min-width: 3ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.tp-trail .tr-sound-panel p {
+  margin: 0;
+  font: 500 12.5px/1.4 var(--sans);
+  color: #cfc8d6;
+}

@@ -15,7 +15,7 @@ type Splash = { x: number; y: number; life: number };
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 
-export function mountWeather(canvas: HTMLCanvasElement) {
+export function mountWeather(canvas: HTMLCanvasElement, opts: { onBolt?: () => void } = {}) {
   const ctx = canvas.getContext("2d");
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (!ctx) return { set() {}, destroy() {} };
@@ -136,6 +136,7 @@ export function mountWeather(canvas: HTMLCanvasElement) {
     }
     bolt = { pts, life: 1 };
     flash = 1;
+    opts.onBolt?.(); // el trueno suena un instante después, como en la realidad
   }
 
   function draw(dt: number, now: number) {

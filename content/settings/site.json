@@ -226,6 +226,13 @@
           "storm": "Tormenta",
           "snow": "Nieve",
           "fireflies": "Luciérnagas"
+        },
+        "sound": {
+          "button": "Sonido del clima",
+          "on": "Sonido activado",
+          "off": "Sonido apagado",
+          "volume": "Volumen",
+          "hint": "Lluvia, viento y truenos suaves. Solo suena en esos climas."
         }
       }
     },
@@ -489,6 +496,13 @@
           "storm": "Storm",
           "snow": "Snow",
           "fireflies": "Fireflies"
+        },
+        "sound": {
+          "button": "Weather sound",
+          "on": "Sound on",
+          "off": "Sound off",
+          "volume": "Volume",
+          "hint": "Gentle rain, wind and thunder. It only plays in those weathers."
         }
       }
     },

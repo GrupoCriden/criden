@@ -25,6 +25,7 @@ import { PAINT, keyed } from "./engine";
 import { buildHalls, HALL_IDS } from "./halls";
 import { mountPetals } from "./petals";
 import { WEATHER_ORDER, mountWeather, type Weather } from "./weather";
+import { createWeatherAudio, type WeatherAudio } from "./weather-audio";
 import { AboutRoom, ContactRoom, ProjectsRoom } from "./rooms";
 import { STOP_MEDIA, STOP_MEDIA_MOBILE } from "./trail-scenes";
 import type { HallId, TemploData } from "./types";
@@ -139,6 +140,12 @@ export default function Trail({ data }: { data: TemploData }) {
   const WeatherIcon = WEATHER_ICON[weather];
   const weatherCanvasRef = useRef<HTMLCanvasElement>(null);
   const weatherRef = useRef<ReturnType<typeof mountWeather> | null>(null);
+  // Sonido del clima: apagado por defecto; la elección y el volumen se recuerdan en el navegador.
+  const audioRef = useRef<WeatherAudio | null>(null);
+  const [soundOn, setSoundOn] = useState(false);
+  const [soundVolume, setSoundVolume] = useState(0.3);
+  const [soundOpen, setSoundOpen] = useState(false);
+  const soundPanelRef = useRef<HTMLDivElement>(null);
 
   // Lleva a cualquier sala: baja hasta ella y, si `open`, muestra su contenido sin pedir otro clic.
   // Si el cuadro ya está abierto, solo cambia de sala (sin cerrarlo ni volver a tocar botones).
@@ -228,16 +235,63 @@ export default function Trail({ data }: { data: TemploData }) {
   useEffect(() => {
     const canvas = weatherCanvasRef.current;
     if (!canvas) return;
-    const controller = mountWeather(canvas);
+    const audio = createWeatherAudio();
+    audioRef.current = audio;
+    const controller = mountWeather(canvas, { onBolt: () => audio.thunder() });
     weatherRef.current = controller;
+    try {
+      const saved = JSON.parse(localStorage.getItem("criden-clima-sonido") ?? "null");
+      if (saved && typeof saved.volume === "number") {
+        setSoundVolume(Math.min(1, Math.max(0, saved.volume)));
+        audio.setVolume(saved.volume);
+      }
+    } catch {}
     return () => {
       controller.destroy();
+      audio.destroy();
       weatherRef.current = null;
+      audioRef.current = null;
     };
   }, []);
   useEffect(() => {
     weatherRef.current?.set(weather);
+    audioRef.current?.setMode(weather);
   }, [weather]);
+  const saveSound = (on: boolean, volume: number) => {
+    try {
+      localStorage.setItem("criden-clima-sonido", JSON.stringify({ on, volume }));
+    } catch {}
+  };
+  // Activar el sonido debe ocurrir dentro del clic: los navegadores no dejan sonar antes.
+  const toggleSound = () => {
+    const next = !soundOn;
+    setSoundOn(next);
+    if (next) {
+      audioRef.current?.setVolume(soundVolume);
+      audioRef.current?.enable();
+      audioRef.current?.setMode(weather);
+    } else audioRef.current?.disable();
+    saveSound(next, soundVolume);
+  };
+  const changeSoundVolume = (v: number) => {
+    setSoundVolume(v);
+    audioRef.current?.setVolume(v);
+    saveSound(soundOn, v);
+  };
+  // El panel del sonido se cierra con Esc o al tocar fuera.
+  useEffect(() => {
+    if (!soundOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setSoundOpen(false);
+    const onDown = (e: PointerEvent) => {
+      if (!soundPanelRef.current?.contains(e.target as Node)) setSoundOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onDown);
+    };
+  }, [soundOpen]);
 
   useEffect(() => {
     const dialog = roomDialogRef.current;
@@ -429,6 +483,48 @@ export default function Trail({ data }: { data: TemploData }) {
             <WeatherIcon size={18} aria-hidden="true" />
             <span className="tr-weather-name">{wx.modes[weather]}</span>
           </button>
+          <div className="tr-sound" ref={soundPanelRef}>
+            <button
+              type="button"
+              className="tr-wind-btn tr-sound-btn"
+              aria-label={wx.sound.button}
+              aria-expanded={soundOpen}
+              aria-controls="templo-sound-panel"
+              onClick={() => setSoundOpen((v) => !v)}
+            >
+              {soundOn ? (
+                <Volume2 size={18} aria-hidden="true" />
+              ) : (
+                <VolumeX size={18} aria-hidden="true" />
+              )}
+            </button>
+            {soundOpen && (
+              <div
+                className="tr-sound-panel"
+                id="templo-sound-panel"
+                role="group"
+                aria-label={wx.sound.button}
+              >
+                <label className="tr-sound-switch">
+                  <input type="checkbox" checked={soundOn} onChange={toggleSound} />
+                  <span>{soundOn ? wx.sound.on : wx.sound.off}</span>
+                </label>
+                <label className="tr-sound-volume">
+                  <span>{wx.sound.volume}</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={soundVolume}
+                    onChange={(e) => changeSoundVolume(Number(e.currentTarget.value))}
+                  />
+                  <b>{Math.round(soundVolume * 100)}%</b>
+                </label>
+                <p>{wx.sound.hint}</p>
+              </div>
+            )}
+          </div>
           <span className="sr-only" role="status">
             {wx.label}: {wx.modes[weather]}
           </span>
